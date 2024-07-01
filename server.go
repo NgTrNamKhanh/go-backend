@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/NgTrNamKhanh/go-backend/controller"
 	"github.com/NgTrNamKhanh/go-backend/entity"
 	"github.com/NgTrNamKhanh/go-backend/initializers"
@@ -8,9 +10,13 @@ import (
 	"github.com/NgTrNamKhanh/go-backend/repo"
 	"github.com/NgTrNamKhanh/go-backend/service"
 	"github.com/gin-gonic/gin"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/google"
 )
 
 var (
+	googleController controller.GoogleController = controller.NewGoogleController(userService)
+
 	validationService service.ValidationService = service.NewValidationService()
 
 	articleService    service.ArticleService       = service.NewArticleService()
@@ -40,9 +46,17 @@ func main() {
 	server := gin.New()
 	server.Use(gin.Recovery(), middleware.Logger())
 
+	goth.UseProviders(
+		google.New(os.Getenv("GOOGLE_CLIENT_ID"), os.Getenv("GOOGLE_CLIENT_SECRET"), "http://localhost:8000/auth/google/callback"),
+	)
+
 	server.POST("/signup", userController.Signup)
 	server.POST("/login", userController.Login)
 	server.GET("/validate", middleware.RequireAuth, userController.Validate)
+
+	server.GET("/auth/google/login", googleController.StartGoogleAuth)
+	server.GET("/auth/google/callback", googleController.CompleteGoogleAuth)
+
 
 	articlePortal := server.Group("/article", middleware.RequireAuth)
 	{

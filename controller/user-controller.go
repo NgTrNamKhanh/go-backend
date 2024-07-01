@@ -1,18 +1,22 @@
 package controller
 
 import (
+	// "context"
 	"net/http"
+	// "os"
 
 	"github.com/NgTrNamKhanh/go-backend/entity"
 	"github.com/NgTrNamKhanh/go-backend/service"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+
 )
 
 type UserController interface {
 	FindAll(ctx *gin.Context) 
 	Signup(ctx *gin.Context) 
 	Login(ctx *gin.Context) 
+
 	Validate(ctx *gin.Context)
 }
 
@@ -21,9 +25,10 @@ type userController struct {
 	validationService service.ValidationService
 }
 
-func NewUserController(service service.UserService,validationService service.ValidationService) UserController{
+func NewUserController(service service.UserService, validationService service.ValidationService) UserController {
+
 	return &userController{
-		service: service,
+		service:           service,
 		validationService: validationService,
 	}
 }
@@ -115,3 +120,4 @@ func(c *userController) Validate(ctx *gin.Context) {
 		"message": user,
 	})
 }
+
